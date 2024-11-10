@@ -47,6 +47,7 @@ def is_url(url_or_filename):
 def load_checkpoint(model,url_or_filename):
     if is_url(url_or_filename):
         cached_file = download_cached_file(url_or_filename, check_hash=False, progress=True)
+        print("cached_file:",cached_file)
         checkpoint = torch.load(cached_file, map_location='cpu') 
     elif os.path.isfile(url_or_filename):        
         checkpoint = torch.load(url_or_filename, map_location='cpu') 

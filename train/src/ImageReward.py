@@ -44,16 +44,16 @@ class MLP(nn.Module):
         
         self.layers = nn.Sequential(
             nn.Linear(self.input_size, 1024),
-            #nn.ReLU(),
+            nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(1024, 128),
-            #nn.ReLU(),
+            nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(128, 64),
-            #nn.ReLU(),
+            nn.ReLU(),
             nn.Dropout(0.1),
             nn.Linear(64, 16),
-            #nn.ReLU(),
+            nn.ReLU(),
             nn.Linear(16, 1)
         )
         
@@ -119,12 +119,40 @@ class ImageReward(nn.Module):
             batch_data = self.encode_pair(batch_data)
         else:
             batch_data = self.encode_data(batch_data)
+
+        print("\nBatch Data:\n",batch_data)
         
         # forward
         emb_better, emb_worse = batch_data['emb_better'], batch_data['emb_worse']
-        
+
+        # 计算整个batch中所有样本对的差异向量 (如果差异很小，说明嵌入向量过于相似，需要检查编码过程和数据。)
+        diff_vectors = emb_better - emb_worse  # 形状：[batch_size, embedding_dim]
+        # 计算所有差异向量的 L2 范数
+        diff_norms = torch.norm(diff_vectors, p=2, dim=1)  # 形状：[batch_size]
+        # 将差异值转换为列表
+        diff_list = diff_norms.cpu().tolist()
+        # 打印每个样本对的差异值列表
+        print("batch中每个样本对的嵌入差异（L2 范数）List:")
+        print(diff_list)
+        # 计算差异值的平均值
+        diff_mean = diff_norms.mean().item()
+        print("样本对嵌入差异List的平均值（整个batch中正负例图片差异的均值）:\n", diff_mean)
+
+
+        # 这里是模型对better的结果的和worse结果的embedding进行计算来预测对应的reward
         reward_better = self.mlp(emb_better)
         reward_worse = self.mlp(emb_worse)
+
+        # reward_better 应该普遍高于 reward_worse，如果不是，则可能存在问题。
+        print("reward_better:", reward_better.squeeze().detach().cpu().numpy())
+        print("reward_worse:", reward_worse.squeeze().detach().cpu().numpy())   
+
+        # 计算 reward_better 和 reward_worse 的欧氏距离和均方误差
+        euclidean_distance = torch.norm(reward_better - reward_worse, p=2)
+        mse = torch.mean((reward_better - reward_worse) ** 2)
+        print("Euclidean Distance (rewards):", euclidean_distance.item())
+        print("Mean Squared Error (MSE of rewards):", mse.item())
+        
         reward = torch.concat((reward_better, reward_worse), dim=1)
         
         return reward
@@ -197,6 +225,16 @@ class ImageReward(nn.Module):
             labels = item["ranking"]
             for id_l in range(len(labels)):
                 for id_r in range(id_l+1, len(labels)):
+
+                    # # 原始代码假设 分数越小质量越好,因为数值实际上代表的是排名啊
+                    # if labels[id_l] < labels[id_r]:
+                    #     txt_better.append(txt_set[id_l])
+                    #     txt_worse.append(txt_set[id_r])
+                    # elif labels[id_l] > labels[id_r]:
+                    #     txt_better.append(txt_set[id_r])
+                    #     txt_worse.append(txt_set[id_l])
+
+                    # 暂时改一下逻辑，分数越高表示样本质量越好
                     if labels[id_l] < labels[id_r]:
                         txt_better.append(txt_set[id_l])
                         txt_worse.append(txt_set[id_r])

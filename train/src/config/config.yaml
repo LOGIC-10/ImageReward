@@ -1,16 +1,19 @@
 # ckpt/config options(static)
+# blip_path: /bjzhyai03/workhome/luoqinyu/WorkSpace/models/ImageReward/ImageReward.pt
+# med_config: /bjzhyai03/workhome/luoqinyu/WorkSpace/models/ImageReward/med_config.json
 blip_path: https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_large.pth
-med_config: src/config/med_config.json
+med_config: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/src/config/med_config.json 
 
 # ckpt/logger options(dynamic)
-checkpoint_base: checkpoint
-visual_base: visualization
-log_base: log
+checkpoint_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/checkpoint_base
+visual_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/visualization
+log_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/log
 
 # dataset
-data_base: dataset
+data_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/dataset_OnlineSource
 image_base: images
-pair_store_base: pair_store_clip
+pair_store_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/pair_store_OnlineSource
+# pair_store_base: /bjzhyai03/workhome/luoqinyu/WorkSpace/ImageReward/train/dataset2/
 
 
 # model parameters

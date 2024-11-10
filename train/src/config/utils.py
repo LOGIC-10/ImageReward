@@ -43,6 +43,8 @@ def load_model(model, ckpt_path = None):
         
     print('load checkpoint from %s'%model_name)
     checkpoint = torch.load(model_name, map_location='cpu') 
+    # checkpoint = {key.split('module.')[1]: value for key, value in checkpoint.items()}
+
     state_dict = checkpoint
     msg = model.load_state_dict(state_dict,strict=False)
     print("missing keys:", msg.missing_keys)
@@ -71,20 +73,27 @@ def is_dist_avail_and_initialized():
 def get_rank():
     if not is_dist_avail_and_initialized():
         return 0
-    return dist.get_rank()
+    rank = dist.get_rank()
+    # print(f"Current process global rank: {rank}")
+    return rank
 
 
 def makedir(path):
     if not os.path.exists(path):
-        os.makedirs(path, 0o777)
+        os.makedirs(path, 0o777, exist_ok=True)
 
 def visualizer():
-    if get_rank() == 0:
-        # filewriter_path = config['visual_base']+opts.savepath+'/'
+    rank = get_rank()
+    if rank == 0:
+        print("Initializing SummaryWriter in process with rank 0")
         save_path = make_path()
         filewriter_path = os.path.join(config['visual_base'], save_path)
-        if opts.clear_visualizer and os.path.exists(filewriter_path):   # 删掉以前的summary，以免重合
+        if opts.clear_visualizer and os.path.exists(filewriter_path):
+            print(f"Clearing existing visualizer directory: {filewriter_path}")
             shutil.rmtree(filewriter_path)
         makedir(filewriter_path)
         writer = SummaryWriter(filewriter_path, comment='visualizer')
         return writer
+    else:
+        print(f"Process with rank {rank}, does not initialize SummaryWriter")
+        return None

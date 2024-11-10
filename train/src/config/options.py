@@ -15,21 +15,21 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 # basic settings
 parser.add_argument('--config', type=str, default='config/config.yaml', help='Path to the config file.')
 parser.add_argument('--seed', default=1234, type=int)
-parser.add_argument('--BatchSize', type=int, default=256, help='')
+parser.add_argument('--BatchSize', type=int, default=32, help='')
 parser.add_argument('--savepath', type=str, default=None, help='')
 parser.add_argument('--preload_path', type=str, default='')
 parser.add_argument('--rank_pair', dest='rank_pair', action='store_true')
 
 # training settings
-parser.add_argument('--batch_size', type=int, default=256, help='')
-parser.add_argument('--accumulation_steps', type=int, default=1, help='')
-parser.add_argument('--epochs', type=int, default=10, help='')
+parser.add_argument('--batch_size', type=int, default=4, help='')
+parser.add_argument('--accumulation_steps', type=int, default=2, help='')
+parser.add_argument('--epochs', type=int, default=50, help='')
 parser.add_argument('--train-iters', type=int, default=None,
                     help='total number of iterations to train over all training runs')
 
 # device settings
-parser.add_argument('--distributed', default=False, type=bool)
-parser.add_argument('--gpu_num', type=int, default=1)
+parser.add_argument('--distributed', default=True, type=bool)
+parser.add_argument('--gpu_num', type=int, default=8)
 parser.add_argument('--gpu_id', type=str, default='0,1,2,3,4,5,6,7')
 
 # training options
@@ -41,7 +41,7 @@ parser.add_argument("--fix_base", dest='fix_base', action='store_true')
 parser.add_argument("--fix_rate", type=float, default=0)
 
 # Learning rate scheduling.
-parser.add_argument('--lr', type=float, default=5e-06,
+parser.add_argument('--lr', type=float, default=1e-3,
                     help='initial learning rate')
 parser.add_argument('--lr-decay-iters', type=int, default=None,
                     help='number of iterations to decay LR over,'
